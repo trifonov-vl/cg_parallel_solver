@@ -1,3 +1,4 @@
+#pragma once
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
@@ -12,6 +13,7 @@ struct ELLMatrix{
     unsigned int size;
     unsigned int nonnull_els_in_row;
     struct ColVal *colvals;
+    unsigned int *diag_indices;
 };
 
 void delete_ELL(struct ELLMatrix *m);

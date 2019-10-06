@@ -9,12 +9,18 @@ void init_ELL(struct ELLMatrix *m, unsigned int size, unsigned int nonnull_els_i
     if(!m->colvals){
         perror("Error in allocation");
     }
+    m->diag_indices = malloc(size * sizeof(unsigned int));
+    if(!m->diag_indices){
+        perror("Error in allocation");
+    }
 }
 
 void delete_ELL(struct ELLMatrix *m){
     assert(m && m->colvals);
     free(m->colvals);
     m->colvals = 0;
+    free(m->diag_indices);
+    m->diag_indices = 0;
 }
 
 void print_ELL(const struct ELLMatrix m){
@@ -46,6 +52,10 @@ void writeRow(const struct ELLMatrix m, unsigned int row_idx, struct ColVal *col
     for(unsigned int i = 0; i < m.nonnull_els_in_row; i++){
         assert(colvals[i].col < 0 || (unsigned int)colvals[i].col < m.size);
         m.colvals[row_idx * m.nonnull_els_in_row + i] = colvals[i];
+
+        if(colvals[i].col >= 0 && (unsigned int)colvals[i].col == row_idx){
+            m.diag_indices[i] = row_idx * m.nonnull_els_in_row + i;
+        }
     }
 }
 
