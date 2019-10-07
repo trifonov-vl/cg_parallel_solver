@@ -3,6 +3,7 @@
 #include <ell_utils.h>
 #include <vector_utils.h>
 #include <solver.h>
+#include <omp_solver.h>
 
 char doc[] = "CG parallel solver";
 
@@ -77,6 +78,15 @@ int main(int argc, char *argv[]) {
     struct Vector x = create_const_Vector(0, m.size);
 
     int it = solve(m, b, x, arguments.tol, arguments.maxit);
+    printf("iters = %d, %f\n", it, compute_L2_norm(x));
+    
+    delete_Vector(&b);
+    delete_Vector(&x);
+    b = create_cosine_Vector(m.size);
+    x = create_const_Vector(0, m.size);
+    
+    omp_set_num_threads(arguments.nt);
+    it = omp_solve(m, b, x, arguments.tol, arguments.maxit);
     printf("iters = %d, %f\n", it, compute_L2_norm(x));
     
     delete_ELL(&m);
