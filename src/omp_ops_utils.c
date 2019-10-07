@@ -45,6 +45,9 @@ void omp_SpMV_store(const struct Vector res, const struct ELLMatrix A, const str
 
         for(unsigned int j = 0; j < A.nonnull_els_in_row; j++){
             struct ColVal *c = &(A.colvals[i * A.nonnull_els_in_row + j]);
+            if(c->col < 0){
+                continue;
+            }
             sum += c->val * x.vals[c->col];
         }
         res.vals[i] = sum;
