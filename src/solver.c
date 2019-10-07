@@ -5,7 +5,10 @@ int solve(const struct ELLMatrix A, const struct Vector b, const struct Vector x
     assert(eps > 0 && max_it >= 0);
     
     double prev_ro, ro, alpha;
-    struct Vector r = axpby(1.0, b, -1.0, SpMV(A, x));
+    struct Vector tmp = SpMV(A, x);
+    struct Vector r = axpby(1.0, b, -1.0, tmp);
+    delete_Vector(&tmp);
+    
     struct Vector z = create_uninit_Vector(x.size);
     struct Vector q = create_uninit_Vector(x.size);
     struct Vector p = create_uninit_Vector(x.size);
