@@ -1,6 +1,9 @@
 #include <argp.h>
 #include <stdlib.h>
 #include <ell_utils.h>
+#include <vector_utils.h>
+#include <solver.h>
+
 char doc[] = "CG parallel solver";
 
 static struct argp_option options[] = {
@@ -44,10 +47,10 @@ static error_t parse_option(int key, char *arg, struct argp_state *state) {
         arguments->tol = strtod(arg, 0);
         break;
     case 'm':
-        arguments->tol = strtoul(arg, 0, 10);
+        arguments->maxit = strtoul(arg, 0, 10);
         break;
     case 'n':
-        arguments->tol = strtoul(arg, 0, 10);
+        arguments->nt = strtoul(arg, 0, 10);
         break;
     default:
         return ARGP_ERR_UNKNOWN;
@@ -70,7 +73,14 @@ int main(int argc, char *argv[]) {
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
     
     struct ELLMatrix m = generate_ELL_3D_DECART(arguments.nx, arguments.ny, arguments.nz);
-    print_ELL(m);
+    struct Vector b = create_cosine_Vector(m.size);
+    struct Vector x = create_const_Vector(0, m.size);
+
+    int it = solve(m, b, x, arguments.tol, arguments.maxit);
+    printf("iters = %d, %f\n", it, compute_L2_norm(x));
+    
     delete_ELL(&m);
+    delete_Vector(&b);
+    delete_Vector(&x);
     return 0;
 }

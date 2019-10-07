@@ -55,8 +55,9 @@ void inv_diag_SpMV_store(const struct Vector res, const struct ELLMatrix A, cons
     assert(res.size == A.size && A.size == x.size);
 
     for(unsigned int i = 0; i < A.size; i++){
-        assert(A.diag_indices[i]);
-        res.vals[i] = 1 / A.diag_indices[i] * x.vals[i];
+        struct ColVal cv = A.colvals[A.diag_indices[i]];
+        assert(cv.val);
+        res.vals[i] = 1 / cv.val * x.vals[i];
     }
 }
 

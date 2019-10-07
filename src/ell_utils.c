@@ -54,7 +54,7 @@ void writeRow(const struct ELLMatrix m, unsigned int row_idx, struct ColVal *col
         m.colvals[row_idx * m.nonnull_els_in_row + i] = colvals[i];
 
         if(colvals[i].col >= 0 && (unsigned int)colvals[i].col == row_idx){
-            m.diag_indices[i] = row_idx * m.nonnull_els_in_row + i;
+            m.diag_indices[row_idx] = row_idx * m.nonnull_els_in_row + i;
         }
     }
 }

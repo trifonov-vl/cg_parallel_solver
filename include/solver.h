@@ -4,4 +4,4 @@
 #include <vector_utils.h>
 #include <assert.h>
 
-void solve(const struct ELLMatrix A, const struct Vector b, const struct Vector x, double eps, int max_it);
+int solve(const struct ELLMatrix A, const struct Vector b, const struct Vector x, double eps, int max_it);

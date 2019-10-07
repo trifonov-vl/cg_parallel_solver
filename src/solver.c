@@ -1,6 +1,6 @@
 #include <solver.h>
 
-void solve(const struct ELLMatrix A, const struct Vector b, const struct Vector x, double eps, int max_it){
+int solve(const struct ELLMatrix A, const struct Vector b, const struct Vector x, double eps, int max_it){
     assert(A.size == b.size && b.size == x.size);
     assert(eps > 0 && max_it >= 0);
     
@@ -10,7 +10,8 @@ void solve(const struct ELLMatrix A, const struct Vector b, const struct Vector 
     struct Vector q = create_uninit_Vector(x.size);
     struct Vector p = create_uninit_Vector(x.size);
 
-    for(int it_num = 0; it_num < max_it; it_num++){
+    int it_num = 0;
+    for(; it_num < max_it; it_num++){
         inv_diag_SpMV_store(z, A, r);
         
         ro = dot(r, z);
@@ -37,4 +38,6 @@ void solve(const struct ELLMatrix A, const struct Vector b, const struct Vector 
     delete_Vector(&z);
     delete_Vector(&q);
     delete_Vector(&p);
+    
+    return it_num;
 }
