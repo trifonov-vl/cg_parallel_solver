@@ -16,6 +16,8 @@ struct Vector create_const_Vector(double val, unsigned int size);
 
 struct Vector create_cosine_Vector(unsigned int size);
 
+struct Vector create_sin_Vector(unsigned int size);
+
 struct Vector copy_Vector(const struct Vector v);
 
 void copy_from_Vector_to_Vector(const struct Vector from, const struct Vector to);

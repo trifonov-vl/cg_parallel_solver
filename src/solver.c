@@ -42,5 +42,5 @@ int solve(const struct ELLMatrix A, const struct Vector b, const struct Vector x
     delete_Vector(&q);
     delete_Vector(&p);
     
-    return it_num;
+    return it_num + 1;
 }

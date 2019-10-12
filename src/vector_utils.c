@@ -35,6 +35,16 @@ struct Vector create_cosine_Vector(unsigned int size){
     return ret;
 }
 
+struct Vector create_sin_Vector(unsigned int size){
+    struct Vector ret = create_uninit_Vector(size);
+    
+    for(unsigned int i = 0; i < size; i++){
+        ret.vals[i] = sin(i * i);
+    }
+
+    return ret;
+}
+
 struct Vector copy_Vector(const struct Vector v){
     struct Vector ret = create_uninit_Vector(v.size);
     memcpy(ret.vals, v.vals, sizeof(double) * v.size);

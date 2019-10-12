@@ -1,5 +1,5 @@
 CXX = gcc
-CXXFLAGS = -g -Wall -O2 -Werror -Wl,-z,defs -Wextra -fopenmp
+CXXFLAGS = -g -Wall -O3 -Werror -Wl,-z,defs -Wextra -fopenmp
 
 # Directories with source code
 SRC_DIR = src
