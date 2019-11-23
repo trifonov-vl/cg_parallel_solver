@@ -1,5 +1,5 @@
-CXX = gcc
-CXXFLAGS = -g -Wall -O3 -Werror -Wl,-z,defs -Wextra -fopenmp
+CXX = mpic++
+CXXFLAGS = -g -Wall -O3 -Wl,-z,defs -Wextra -std=c++14
 
 # Directories with source code
 SRC_DIR = src
@@ -22,7 +22,7 @@ make_path = $(addsuffix $(1), $(basename $(subst $(2), $(3), $(4))))
 src_to_obj = $(call make_path,.o, $(SRC_DIR), $(OBJ_DIR), $(1))
 
 # All source files in our project that must be built into movable object code.
-CXXFILES := $(wildcard $(SRC_DIR)/*.c)
+CXXFILES := $(wildcard $(SRC_DIR)/*.cpp)
 OBJFILES := $(call src_to_obj, $(CXXFILES))
 
 # Default target (make without specified target).
@@ -40,7 +40,7 @@ $(BIN_DIR)/main: $(OBJFILES)
 	$(CXX) $(CXXFLAGS) $(filter %.o, $^) -o $@ $(LDFLAGS)
 
 # Pattern for compiling object files (*.o)
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(OBJ_DIR) $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -c -o $(call src_to_obj, $<) $<
 
