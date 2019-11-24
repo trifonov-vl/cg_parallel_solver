@@ -1,12 +1,24 @@
 #include <mpi_solver.hpp>
 
-#define DEBUG 0
+#define DEBUG 1
 
 #define crash(str, code, id) exit(Crash(str, code, id)) // via exit define so static analyzer knows its an exit point
 static int Crash(const char *fmt, const int &code, const int &id){
     std::cout << id << " failed with msg: " << fmt << std::endl << std::flush;
     MPI_Abort(MPI_COMM_WORLD, code);
     return code;
+}
+
+
+void pprintf(const std::string &s, const int &proc_id, const int &proc_num){ 
+    MPI_Barrier(MPI_COMM_WORLD);
+    for(int p=0; p<proc_num; p++){
+        MPI_Barrier(MPI_COMM_WORLD);
+        if(proc_id != p) continue; 
+        std::cout << "id: " << proc_id << " " << s << std::endl << std::flush;
+    }
+    std::cout << std::flush;
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 struct Coordinates{
@@ -38,9 +50,9 @@ struct Parameters{
 };
 
 int global2proc_id(const Coordinates &global, const Parameters &pars){
-    unsigned int decart_x = global.x / ceil(pars.Nx / pars.Px);
-    unsigned int decart_y = global.y / ceil(pars.Ny / pars.Py);
-    unsigned int decart_z = global.z / ceil(pars.Nz / pars.Pz);
+    unsigned int decart_x = global.x / (pars.Nx / pars.Px + (pars.Nx / pars.Px != 0));
+    unsigned int decart_y = global.y / (pars.Ny / pars.Py + (pars.Ny / pars.Py != 0));
+    unsigned int decart_z = global.z / (pars.Nz / pars.Pz + (pars.Nz / pars.Pz != 0));
     return (decart_x + pars.Px * decart_y + pars.Px * pars.Py * decart_z) % pars.ovrl_proc_num;
 }
 
@@ -49,13 +61,13 @@ struct RegionBoundaries{
     unsigned int x_size, y_size, z_size;
 
     RegionBoundaries(const Parameters &pars){
-        unsigned int N_per_x = pars.Nx / pars.Px;
-        unsigned int N_per_y = pars.Ny / pars.Py;
-        unsigned int N_per_z = pars.Nz / pars.Pz;
+        unsigned int N_per_x = pars.Nx / pars.Px + (pars.Nx / pars.Px != 0);
+        unsigned int N_per_y = pars.Ny / pars.Py + (pars.Ny / pars.Py != 0);
+        unsigned int N_per_z = pars.Nz / pars.Pz + (pars.Nz / pars.Pz != 0);
 
-        start_x = N_per_x * pars.decart_id.x; end_x = N_per_x * (pars.decart_id.x + 1);
-        start_y = N_per_y * pars.decart_id.y; end_y = N_per_y * (pars.decart_id.y + 1);
-        start_z = N_per_z * pars.decart_id.z; end_z = N_per_z * (pars.decart_id.z + 1);
+        start_x = N_per_x * pars.decart_id.x; end_x = N_per_x * (pars.decart_id.x + 1) > pars.Nx ? pars.Nx : N_per_x * (pars.decart_id.x + 1);
+        start_y = N_per_y * pars.decart_id.y; end_y = N_per_y * (pars.decart_id.y + 1) > pars.Ny ? pars.Ny : N_per_y * (pars.decart_id.y + 1);
+        start_z = N_per_z * pars.decart_id.z; end_z = N_per_z * (pars.decart_id.z + 1) > pars.Nz ? pars.Nz : N_per_z * (pars.decart_id.z + 1);
         x_size = end_x - start_x;
         y_size = end_y - start_y;
         z_size = end_z - start_z;
@@ -198,19 +210,6 @@ std::pair<
 
     return std::make_pair(input_ret, output_ret);
 }
-
-
-void pprintf(const std::string &s, const int &proc_id, const int &proc_num){ 
-    MPI_Barrier(MPI_COMM_WORLD);
-    for(int p=0; p<proc_num; p++){
-        MPI_Barrier(MPI_COMM_WORLD);
-        if(proc_id != p) continue; 
-        std::cout << "id: " << proc_id << " " << s << std::endl << std::flush;
-    }
-    std::cout << std::flush;
-    MPI_Barrier(MPI_COMM_WORLD);
-}
-
 
 std::string matrix_columns_to_string(const ELLMatrix &m, 
     const std::vector<std::pair<int, unsigned int>> &part_L2G){
