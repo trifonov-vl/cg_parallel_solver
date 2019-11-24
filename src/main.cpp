@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     arguments.nseeds = 1;
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
-    solve_with_mpi(arguments.nx, arguments.ny, arguments.nz,
+    test_mpi_solver(arguments.nx, arguments.ny, arguments.nz,
         arguments.px, arguments.py, arguments.pz, arguments.tol, arguments.maxit, arguments.qa, arguments.nseeds
     );
     MPI_Finalize();

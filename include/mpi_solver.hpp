@@ -13,7 +13,7 @@
 #include <ops_utils.hpp>
 
 
-void solve_with_mpi(unsigned int nx, unsigned int ny, unsigned int nz, 
+void test_mpi_solver(unsigned int nx, unsigned int ny, unsigned int nz, 
     unsigned int px, unsigned int py, unsigned int pz,
     double tol, unsigned int maxit, bool qa, unsigned int nseeds
 );

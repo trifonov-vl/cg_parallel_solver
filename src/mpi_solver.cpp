@@ -1,6 +1,6 @@
 #include <mpi_solver.hpp>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define crash(str, code, id) exit(Crash(str, code, id)) // via exit define so static analyzer knows its an exit point
 static int Crash(const char *fmt, const int &code, const int &id){
@@ -369,9 +369,9 @@ void run_qa(
     for(unsigned int i = 0; i < nseeds; i++){
         double start = MPI_Wtime();
         auto vec_res = axpby(2.0, x, 3.0, y);
+        t += MPI_Wtime() - start;
         double L2 = mpi_compute_L2_norm(vec_res, x.size(), pars.proc_id);
         double Linf = mpi_compute_L_inf_norm(vec_res, pars.proc_id);
-        t += MPI_Wtime() - start;
         pprintf("AXPBY L2 result = " + double_to_string(L2, 15, 12, true) + 
             ", L_inf result = " + double_to_string(Linf, 15, 12, true), 
             pars.proc_id, pars.ovrl_proc_num);
@@ -470,7 +470,7 @@ void run_solver(
     }
 }
 
-void solve_with_mpi(unsigned int nx, unsigned int ny, unsigned int nz, 
+void test_mpi_solver(unsigned int nx, unsigned int ny, unsigned int nz, 
     unsigned int px, unsigned int py, unsigned int pz,
     double tol, unsigned int maxit, bool qa, unsigned int nseeds){
 
