@@ -27,8 +27,8 @@ class ELLMatrix{
         diag_indices(size_),
         size(size_), 
         nonnull_els_in_row(nonnull_elems){
-            if (nonnull_els_in_row > size)
-                throw std::logic_error("Bad size arguments in ELL constructor");
+            // if (nonnull_els_in_row > size)
+            //     throw std::logic_error("Bad size arguments in ELL constructor");
         }
     
     ColVal get_elem_from_row(const unsigned int &row_idx, const unsigned int &elem_num) const {
@@ -75,7 +75,4 @@ class ELLMatrix{
 
 std::vector<ColVal> generate_row_3D_DECART(
     const unsigned int &i, const unsigned int &j, const unsigned int &k, 
-    const unsigned int &Nx, const unsigned int &Ny, const unsigned int &Nz);
-
-ELLMatrix generate_ELL_3D_DECART(
     const unsigned int &Nx, const unsigned int &Ny, const unsigned int &Nz);

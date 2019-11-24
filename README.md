@@ -1,1 +1,1 @@
-# CG linear equations solver with OpenMP thread parallelism
+# CG linear equations solver with MPI parallelism

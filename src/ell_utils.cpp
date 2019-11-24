@@ -89,18 +89,3 @@ std::vector<ColVal> generate_row_3D_DECART(
 
     return ret;
 }
-
-ELLMatrix generate_ELL_3D_DECART(
-    const unsigned int &Nx, const unsigned int &Ny, const unsigned int &Nz){
-    
-    ELLMatrix ret(Nx * Ny * Nz, 7);
-    
-    for(unsigned int i = 0; i < Nx; i++){
-        for(unsigned int j = 0; j < Ny; j++){
-            for(unsigned int k = 0; k < Nz; k++){
-                ret.write_row(k * Nx * Ny + j * Nx + i, generate_row_3D_DECART(i, j, k, Nx, Ny, Nz));
-            }
-        }
-    }
-    return ret;
-}

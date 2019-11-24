@@ -30,19 +30,20 @@ void axpby_store(
 }
 
 std::vector<double> SpMV(const ELLMatrix &A, const std::vector<double> &x){
-    if(A.size != x.size())
-        throw std::logic_error("vector and matrice must have equal sizes");
-    std::vector<double> ret(x.size());
+    // check commented due to mpi realisation
+    // if(A.size != x.size())
+    //     throw std::logic_error("vector and matrice must have equal sizes");
+    std::vector<double> ret(x.size(), 0.0);
     SpMV_store(ret, A, x);
     return ret;
 }
 
 void SpMV_store(std::vector<double> &res, const ELLMatrix &A, const std::vector<double> &x){
-    if(&res == &x)
-        throw std::logic_error("result and input vector must be different objects");
-    
-    if(A.size != x.size() || x.size() != res.size())
-        throw std::logic_error("vectors and matrice must have equal sizes");
+    // checks commented due to mpi realisation
+    // if(&res == &x)
+    //     throw std::logic_error("result and input vector must be different objects");
+    // if(A.size != x.size() || x.size() != res.size())
+    //     throw std::logic_error("vectors and matrice must have equal sizes");
     
     for(unsigned int i = 0; i < A.size; i++){
         double sum = 0.0;
@@ -67,8 +68,9 @@ std::vector<double> inv_diag_SpMV(const ELLMatrix &A, const std::vector<double> 
 }
 
 void inv_diag_SpMV_store(std::vector<double> &res, const ELLMatrix &A, const std::vector<double> &x){
-    if(A.size != x.size() || x.size() != res.size())
-        throw std::logic_error("vectors and matrice must have equal sizes");
+    // checks commented due to mpi realisation
+    // if(A.size != x.size() || x.size() != res.size())
+    //     throw std::logic_error("vectors and matrice must have equal sizes");
     
      for(unsigned int i = 0; i < A.size; i++){
         const ColVal &cv = A.get_diagonal_element(i);

@@ -8,6 +8,7 @@
 char doc[] = "CG parallel MPI solver";
 
 static struct argp_option options[] = {
+    { "qa", 'q', 0, 0, "Test base operations", 0 },
     { "nx", 'x', "uint", 0, "x matrix dimension size", 0 },
     { "ny", 'y', "uint", 0, "y matrix dimension size", 0 },
     { "nz", 'z', "uint", 0, "z matrix dimension size", 0 },
@@ -16,10 +17,12 @@ static struct argp_option options[] = {
     { "pz", 'c', "uint", 0, "pz numeber of subregions", 0 },
     { "tol", 't', "double", 0, "residual", 0 },
     { "maxit", 'm', "uint", 0, "max iteration number", 0 },
+    { "nseeds", 's', "uint", 0, "number of seeds", 0},
     { 0 }
 };
 
 struct arguments {
+    int qa;
     unsigned int nx;
     unsigned int ny;
     unsigned int nz;
@@ -28,12 +31,16 @@ struct arguments {
     unsigned int pz;
     double tol;
     unsigned int maxit;
+    unsigned int nseeds;
 };
 
 static error_t parse_option(int key, char *arg, struct argp_state *state) {
     struct arguments *arguments = (struct arguments*) state->input;
     
     switch (key) {
+    case 'q':
+        arguments->qa=1;
+        break;
     case 'x':
         arguments->nx = strtoul(arg, 0, 10);;
         break;
@@ -58,6 +65,9 @@ static error_t parse_option(int key, char *arg, struct argp_state *state) {
     case 'm':
         arguments->maxit = strtoul(arg, 0, 10);
         break;
+    case 's':
+        arguments->nseeds = strtoul(arg, 0, 10);
+        break;
     default:
         return ARGP_ERR_UNKNOWN;
     }
@@ -76,6 +86,7 @@ int main(int argc, char *argv[]) {
     }
 
     struct arguments arguments;
+    arguments.qa = 0;
     arguments.nx = 0;
     arguments.ny = 0;
     arguments.nz = 0;
@@ -83,11 +94,13 @@ int main(int argc, char *argv[]) {
     arguments.px = 0;
     arguments.py = 0;
     arguments.pz = 0;
+    arguments.nseeds = 1;
 
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
     solve_with_mpi(arguments.nx, arguments.ny, arguments.nz,
-        arguments.px, arguments.py, arguments.pz, arguments.tol, arguments.maxit
+        arguments.px, arguments.py, arguments.pz, arguments.tol, arguments.maxit, arguments.qa, arguments.nseeds
     );
+    MPI_Finalize();
     
     return 0;
 }
