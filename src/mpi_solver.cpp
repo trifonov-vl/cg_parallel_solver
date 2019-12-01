@@ -230,7 +230,7 @@ std::string matrix_columns_to_string(const ELLMatrix &m,
     return ret;
 }
 
-double mpi_dot(const std::vector<double> &x, const std::vector<double> &y, const unsigned int &halo_offset, const int &proc_id){
+double mpi_dot_all_reduce(const std::vector<double> &x, const std::vector<double> &y, const unsigned int &halo_offset, const int &proc_id){
     double result = std::inner_product(x.begin(), x.begin() + halo_offset, y.begin(), 0.0);
     
     int mpi_res = MPI_Allreduce(&result, &result, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
@@ -240,8 +240,21 @@ double mpi_dot(const std::vector<double> &x, const std::vector<double> &y, const
     return result;
 }
 
+double mpi_dot_reduce_to(const std::vector<double> &x, const std::vector<double> &y, const unsigned int &halo_offset, const int &proc_id, const int &proc_to){
+    double result = std::inner_product(x.begin(), x.begin() + halo_offset, y.begin(), 0.0);
+    double recv;
+    
+    int mpi_res = MPI_Reduce(&result, &recv, 1, MPI_DOUBLE, MPI_SUM, proc_to, MPI_COMM_WORLD);
+    if(mpi_res != MPI_SUCCESS)
+        crash("MPI_Reduce in dot failed", mpi_res, proc_id);
+    
+    return recv;
+}
+
+
+
 double mpi_compute_L2_norm(const std::vector<double> &x, const unsigned int &halo_offset, const int &proc_id){
-    double result = mpi_dot(x, x, halo_offset, proc_id);
+    double result = mpi_dot_all_reduce(x, x, halo_offset, proc_id);
     return sqrt(result);
 }
 
@@ -355,10 +368,13 @@ void run_qa(
     double t = 0.0;
 
     for(unsigned int i = 0; i < nseeds; i++){
+        MPI_Barrier(MPI_COMM_WORLD);
         double start = MPI_Wtime();
-        double res = mpi_dot(x, y, x.size(), pars.proc_id);
+        double res = mpi_dot_reduce_to(x, y, x.size(), pars.proc_id, 0);
+        MPI_Barrier(MPI_COMM_WORLD);
         t += MPI_Wtime() - start;
-        pprintf("DOT result = " + double_to_string(res, 15, 12, true), pars.proc_id, pars.ovrl_proc_num);
+        if(pars.proc_id == 0)
+            std::cout << "DOT result = " << double_to_string(res, 15, 12, true) << std::endl << std::flush;
     }
 
     if(pars.proc_id == 0){
@@ -367,8 +383,10 @@ void run_qa(
 
     t = 0.0;
     for(unsigned int i = 0; i < nseeds; i++){
+        MPI_Barrier(MPI_COMM_WORLD);
         double start = MPI_Wtime();
         auto vec_res = axpby(2.0, x, 3.0, y);
+        MPI_Barrier(MPI_COMM_WORLD);
         t += MPI_Wtime() - start;
         double L2 = mpi_compute_L2_norm(vec_res, x.size(), pars.proc_id);
         double Linf = mpi_compute_L_inf_norm(vec_res, pars.proc_id);
@@ -384,9 +402,11 @@ void run_qa(
     t = 0.0;
     x = create_cosine_extended(part_L2G);
     for(unsigned int i = 0; i < nseeds; i++){
+        MPI_Barrier(MPI_COMM_WORLD);
         double start = MPI_Wtime();
         update_halo(pars.proc_id, x, input, output, input_buffers, output_buffers);
         auto vec_res = SpMV(local_matrix, x);
+        MPI_Barrier(MPI_COMM_WORLD);
         t += MPI_Wtime() - start;
         pprintf("SPMV L2 result = " + double_to_string(mpi_compute_L2_norm(vec_res, local_matrix.size, pars.proc_id), 15, 12, true) + 
             ", L_inf result = " + double_to_string(mpi_compute_L_inf_norm(vec_res, pars.proc_id), 15, 12, true), 
@@ -418,7 +438,7 @@ int solve(
     for(; it_num < max_it; it_num++){
         inv_diag_SpMV_store(z, local_matrix, r);
         
-        double ro = mpi_dot(r, z, local_matrix.size, proc_id);
+        double ro = mpi_dot_all_reduce(r, z, local_matrix.size, proc_id);
         if(it_num > 0){
             axpby_store(p, 1.0, z, ro / prev_ro, p);
         }
@@ -429,7 +449,7 @@ int solve(
         
         update_halo(proc_id, p, input, output, input_buffers, output_buffers);
         SpMV_store(q, local_matrix, p);
-        double alpha = ro / mpi_dot(p, q, local_matrix.size, proc_id);
+        double alpha = ro / mpi_dot_all_reduce(p, q, local_matrix.size, proc_id);
         axpby_store(x, 1.0, x, alpha, p);
         axpby_store(r, 1.0, r, -alpha, q);
         
@@ -453,9 +473,10 @@ void run_solver(
     for(unsigned int i = 0; i < nseeds; i++){
         std::vector<double> x(b.size(), 0);
         double start = MPI_Wtime();
-        
+        MPI_Barrier(MPI_COMM_WORLD);
         int it = solve(pars.proc_id, local_matrix, b, x, 
             input, output, input_buffers, output_buffers, eps, max_it);
+        MPI_Barrier(MPI_COMM_WORLD);
         t += MPI_Wtime() - start;
         auto res = SpMV(local_matrix, x);
         axpby_store(res, 1.0, res, -1.0, b);
