@@ -378,7 +378,7 @@ void run_qa(
     }
 
     if(pars.proc_id == 0){
-        std::cout << "DOT mean time = " << double_to_string(t / nseeds, 5, 3, false) << std::endl << std::flush;
+        std::cout << "DOT mean time = " << double_to_string(t / nseeds, 10, 5, false) << std::endl << std::flush;
     }
 
     t = 0.0;
@@ -396,7 +396,7 @@ void run_qa(
     }
 
     if(pars.proc_id == 0){
-        std::cout << "AXPBY mean time = " << double_to_string(t / nseeds, 5, 3, false) << std::endl << std::flush;
+        std::cout << "AXPBY mean time = " << double_to_string(t / nseeds, 10, 5, false) << std::endl << std::flush;
     }
 
     t = 0.0;
@@ -413,7 +413,7 @@ void run_qa(
             pars.proc_id, pars.ovrl_proc_num);
     }
     if(pars.proc_id == 0){
-        std::cout << "SpMV mean time = " << double_to_string(t / nseeds, 5, 3, false) << std::endl << std::flush;
+        std::cout << "SpMV mean time = " << double_to_string(t / nseeds, 10, 5, false) << std::endl << std::flush;
     }
 }
 
@@ -487,7 +487,7 @@ void run_solver(
     }
 
     if(pars.proc_id == 0){
-        std::cout << "CG solver mean time = " << double_to_string(t / nseeds, 5, 3, false) << std::endl << std::flush;
+        std::cout << "CG solver mean time = " << double_to_string(t / nseeds, 10, 5, false) << std::endl << std::flush;
     }
 }
 
